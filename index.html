@@ -114,7 +114,7 @@ table.g{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:.8rem}
 
 <section class="hero">
 <h1>Uniformes<span>2026–2027</span></h1>
-<p class="lead">Ya disponibles. <b>Elegí para quién es, las prendas y el talle</b>, y mandá el pedido por WhatsApp para coordinar el pago y la entrega.</p>
+<p class="lead">Ya disponible! no te quedes sin el tuyo</p>
 </section>
 
 <section id="who"><p class="step">Paso 1</p><h2>¿Para quién es el uniforme?</h2>
@@ -130,10 +130,10 @@ table.g{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:.8rem}
 <div class="total"><span>Total</span><b id="total">$0</b></div>
 </div>
 <div>
-<label for="nom">Nombre del alumno o alumna</label>
-<input type="text" id="nom" autocomplete="name" placeholder="Nombre y apellido">
-<label for="grp">Clase o grupo</label>
-<input type="text" id="grp" placeholder="Ej: Jazz juvenil">
+<label for="nom">Nombre y apellido del alumno o alumna</label>
+<input type="text" id="nom" autocomplete="name" placeholder="Nombre y apellido" required aria-required="true">
+<label for="grp">Disciplina</label>
+<input type="text" id="grp" placeholder="Ej: Jazz" required aria-required="true">
 <a class="btn pink" id="send" href="#" target="_blank" rel="noopener" aria-disabled="true">Enviar pedido por WhatsApp</a>
 <p class="note">Se abre WhatsApp con tu pedido ya escrito. Revisalo y enviá el mensaje.</p>
 </div>
@@ -145,13 +145,12 @@ table.g{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:.8rem}
 
 <script>
 const WA="5493547666794"; // número de WhatsApp de la academia, con código de país
-const IMG={completo:["img/completo.png",1024],buzo:["img/buzo.png",1024],jogger:["img/jogger.png",1024],remera:["img/remera.png",1024]};
+const IMG={buzo:["img/buzo.png",1024],jogger:["img/jogger.png",1024],remera:["img/remera.png",1024]};
 const CATS={
- adulto:{label:"Juvenil / adulto",range:"XS a 2XL",sizes:["XS","S","M","L","XL","2XL"],def:"M",price:{completo:115000,buzo:42000,jogger:38000,remera:35000}},
- nino:{label:"Niños",range:"6 a 16",sizes:["6","8","10","12","14","16"],def:"10",price:{completo:105000,buzo:38000,jogger:35000,remera:29000}}
+ adulto:{label:"Juvenil / adulto",range:"XS a 2XL",sizes:["XS","S","M","L","XL","2XL"],def:"M",price:{buzo:42000,jogger:38000,remera:35000}},
+ nino:{label:"Niños",range:"6 a 16",sizes:["6","8","10","12","14","16"],def:"10",price:{buzo:38000,jogger:35000,remera:29000}}
 };
 const P=[
- {id:"completo",name:"Uniforme completo",desc:"Buzo, jogger y remera. Elegís un solo talle para las tres prendas."},
  {id:"buzo",name:"Buzo",desc:"Negro con capucha, vivos blancos y el logo de GEMA."},
  {id:"jogger",name:"Jogger",desc:"Negro, corte amplio con vivos blancos a los costados."},
  {id:"remera",name:"Remera",desc:"Negra con vivos blancos y el logo de GEMA."}
@@ -196,7 +195,7 @@ function shop(){
  <div class="info"><span class="tag">${C.label} · talles ${C.range}</span>
   <h2>${p.name}</h2><p>${p.desc}</p>
   <fieldset><legend>Talle</legend>${C.sizes.map(s=>`<label class="sz"><input type="radio" name="s-${p.id}" value="${s}" ${s===size[p.id]?"checked":""}><span>${s}</span></label>`).join("")}</fieldset>
-  <a class="glink" href="#${p.id==="completo"?"guia":"g-"+p.id}">Ver guía de talles y cómo medir</a>
+  <a class="glink" href="#g-${p.id}">Ver guía de talles y cómo medir</a>
   <div class="buy"><div class="price">${fmt(C.price[p.id])}</div>
   <div class="ctl"><div class="qty"><button type="button" data-d="-1" aria-label="Quitar uno">−</button><output>${qty[p.id]}</output><button type="button" data-d="1" aria-label="Agregar uno">+</button></div>
   <button type="button" class="btn" data-add>Agregar</button></div></div></div>
@@ -228,13 +227,15 @@ $("#list").addEventListener("click",e=>{const b=e.target.closest("[data-rm]");if
 function render(){
  const nm=id=>P.find(p=>p.id===id).name, pr=c=>CATS[c.cat].price[c.id];
  const count=cart.reduce((a,c)=>a+c.qty,0), total=cart.reduce((a,c)=>a+c.qty*pr(c),0);
- $("#list").innerHTML=cart.length?cart.map((c,i)=>`<li class="it"><div>${c.qty} × ${nm(c.id)}<small>${CATS[c.cat].label} · talle ${c.size}${c.id==="completo"?" (las 3 prendas)":""} · ${fmt(c.qty*pr(c))}</small></div><button type="button" data-rm="${i}">Quitar</button></li>`).join(""):`<li class="empty">Todavía no agregaste nada. Elegí para quién es y sumá una prenda.</li>`;
+ $("#list").innerHTML=cart.length?cart.map((c,i)=>`<li class="it"><div>${c.qty} × ${nm(c.id)}<small>${CATS[c.cat].label} · talle ${c.size} · ${fmt(c.qty*pr(c))}</small></div><button type="button" data-rm="${i}">Quitar</button></li>`).join(""):`<li class="empty">Todavía no agregaste nada. Elegí para quién es y sumá una prenda.</li>`;
  $("#total").textContent=fmt(total);$("#n").textContent=$("#bn").textContent=count;$("#bt").textContent=fmt(total);
  $("#bar").classList.toggle("on",count>0);
  const nom=$("#nom").value.trim(), grp=$("#grp").value.trim();
- const msg=`Hola GEMA! Quiero pedir uniformes 2026–2027:\n`+cart.map(c=>`• ${c.qty} × ${nm(c.id)} (${CATS[c.cat].label.toLowerCase()}, talle ${c.size}${c.id==="completo"?", las 3 prendas":""}) – ${fmt(c.qty*pr(c))}`).join("\n")+`\nTotal: ${fmt(total)}`+(nom?`\nAlumno/a: ${nom}`:"")+(grp?`\nClase: ${grp}`:"");
- const a=$("#send");a.href=cart.length?`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`:"#";
- a.setAttribute("aria-disabled",cart.length?"false":"true");
+ const msg=`Hola! Quiero pedir mi uniforme.\n\nMi pedido:\n`+cart.map(c=>`• ${c.qty} × ${nm(c.id)} (${CATS[c.cat].label.toLowerCase()}, talle ${c.size}) – ${fmt(c.qty*pr(c))}`).join("\n")+`\n\nTotal: ${fmt(total)}`+(nom?`\nAlumno/a: ${nom}`:"")+(grp?`\nClase: ${grp}`:"")+"\n\nMuchas gracias!";
+ const a=$("#send");
+ const listo=cart.length>0&&nom.length>0&&grp.length>0;
+ a.setAttribute("aria-disabled",listo?"false":"true");
+ a.href=listo?`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`:"#";
 }
 reset();shop();render();
 if(matchMedia("(prefers-reduced-motion: reduce)").matches){const v=document.querySelector(".reel video");v.removeAttribute("autoplay");v.pause()}
